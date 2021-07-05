@@ -8,8 +8,8 @@
   "type": "module",
   "source": "./src/index.ts",
   "typings": "dist/index.d.ts",
-  "exports": "./dist/index.modern.js",
   "main": "./dist/index.cjs",
+  "exports": "./dist/index.modern.js",
   "module": "./dist/index.module.js",
   "unpkg": "./dist/index.umd.js",
   "scripts": {
