@@ -1,193 +1,145 @@
-import {
-  PoteBlock,
-  PoteChild,
-  PoteCustomBlock,
-  PoteListBlock,
-  PoteMarkDef,
-  PoteTextBlock,
-  parse,
-} from './raw-parser';
-
-function invariant(condition: unknown, message?: string): asserts condition {
-  if (condition) {
-    return;
-  } else {
-    throw new Error(`Invariant failed: ${message || ''}`);
-  }
-}
-
-interface Mark {
-  type: string;
-  options?: Record<string, unknown>;
-}
-
-interface TextSpan {
-  key: string;
-  type: string; // can this be 'span' | 'link' ?
-  marks: Mark[];
+export interface PoteChild {
+  _key: string;
+  _type: string;
+  marks: string[];
   text: string;
 }
 
-interface TextBlock {
+export interface PoteMarkDef {
+  _key: string;
+  _type: string;
+  [optionName: string]: unknown;
+}
+
+export interface PoteTextBlock {
   kind: 'text';
-  key: string;
+  _key: string;
+  _type: string;
   style: string;
-  spans: TextSpan[];
+  markDefs: PoteMarkDef[];
+  children: PoteChild[];
 }
 
-interface CustomBlock {
-  kind: 'custom';
-  key: string;
-  fields: Record<string, unknown>;
-}
-
-interface ListBlock {
+export interface PoteListBlock {
   kind: 'list';
-  type: string;
+  _key: string;
+  _type: string;
   level: number;
-  children: (TextBlock | ListBlock)[];
+  listItem: string;
+  markDefs: PoteMarkDef[];
+  children: PoteChild[];
+  style: string;
 }
 
-export type ParsedPortableText = (TextBlock | ListBlock | CustomBlock)[];
+export interface PoteCustomBlock {
+  kind: 'custom';
+  _key: string;
+  _type: string;
+  [customOptionName: string]: unknown;
+}
 
-function parseMarkDefs(markDefs: PoteMarkDef[]): Record<string, Mark> {
-  return Object.fromEntries(
-    markDefs.map<[string, Mark]>((e) => {
-      const { _key, _type, ...rest } = e;
-      return [_key, { type: _type, options: rest }];
-    }),
+interface PoteThing {
+  _key: string;
+  _type: string;
+  [key: string]: unknown;
+}
+
+export type PoteBlock = PoteListBlock | PoteTextBlock | PoteCustomBlock;
+
+export type PoteBlocks = PoteBlock[];
+
+// fixme: should we check that there is at least one child on blocks?
+
+function isPoteThing(thing: unknown): thing is PoteThing {
+  return (
+    typeof thing === 'object' &&
+    thing != null &&
+    '_key' in thing &&
+    typeof (thing as any)._key === 'string' &&
+    typeof (thing as any)._type === 'string'
   );
 }
 
-function parseNonListBlock(
-  block: PoteCustomBlock | PoteTextBlock,
-): TextBlock | CustomBlock {
-  if (block.kind === 'text') {
-    const markDefsMap = parseMarkDefs(block.markDefs);
-    const ret: TextBlock = {
-      kind: 'text',
-      key: block._key,
-      style: block.style,
-      spans: parseSpans(markDefsMap, block.children),
-    };
-    return ret;
+function looksLikeTextBlock(block: unknown): block is PoteThing {
+  return (
+    isPoteThing(block) &&
+    block._type === 'block' &&
+    typeof block['style'] === 'string' &&
+    Array.isArray(block['children']) &&
+    Array.isArray(block['markDefs'])
+  );
+}
+
+function looksLikeListBlock(block: unknown): block is PoteThing {
+  return (
+    isPoteThing(block) &&
+    looksLikeTextBlock(block) &&
+    typeof block['level'] === 'number' &&
+    typeof block['listItem'] === 'string'
+  );
+}
+
+function looksLikeCustomBlock(block: unknown): block is PoteThing {
+  return isPoteThing(block) && block._type !== 'block';
+}
+
+class PoteParseError extends Error {
+  failedBlock: unknown;
+
+  constructor(message: string, block: unknown) {
+    super(message);
+    this.failedBlock = block;
+  }
+}
+
+function validateMarkDefs(thing: unknown) {
+  if (!Array.isArray(thing)) {
+    throw new PoteParseError('Unable to parse markDefs', thing);
   } else {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { _key, _type, kind, ...rest } = block;
-    const ret: CustomBlock = {
-      kind: 'custom',
-      key: _key,
-      fields: rest as Record<string, unknown>,
-    };
-    return ret;
+    thing.forEach((markDef) => {
+      if (!isPoteThing(markDef)) {
+        throw new PoteParseError('Unable to parse markDef', markDef);
+      }
+    });
   }
 }
 
-type Level = (PoteListBlock | Level)[];
+function validateChildren(thing: unknown) {
+  if (!Array.isArray(thing)) {
+    throw new PoteParseError('Unable to parse children', thing);
+  } else {
+    thing.forEach((child) => {
+      const valid =
+        isPoteThing(child) &&
+        Array.isArray(child['marks']) &&
+        child['marks'].every((e) => typeof e === 'string') &&
+        typeof child['text'] === 'string';
 
-// try non-empty array?
-// public for testing
-export function groupByLevel(things: PoteListBlock[]): Level {
-  invariant(things.length > 0 && !Array.isArray(things[0]));
-
-  const [first, ...rest] = things;
-  const ret: Level = [first];
-  let index = 0;
-
-  while (index < rest.length) {
-    const item = rest[index];
-    if (item.level === first.level) {
-      ret.push(item);
-      index++;
-    } else if (item.level > first.level) {
-      const startIndex = rest.indexOf(item);
-      const children = groupByLevel(rest.slice(startIndex));
-      ret.push(children);
-      index += children.flat().length;
-    } else if (item.level < first.level) {
-      return ret;
-    }
+      if (!valid) {
+        throw new PoteParseError('Unable to parse child', child);
+      }
+    });
   }
-  return ret;
 }
 
-function parseListLevels(levels: Level): ListBlock {
-  const [first] = levels;
-  invariant(!Array.isArray(first));
-  const block: ListBlock = {
-    kind: 'list',
-    level: first.level,
-    type: first.listItem,
-    children: [],
-  };
-  for (const level of levels) {
-    if (Array.isArray(level)) {
-      block.children.push(parseListLevels(level));
-    } else {
-      const markDefsMap = parseMarkDefs(level.markDefs);
-      const ret: TextBlock = {
-        kind: 'text',
-        key: level._key,
-        style: level.style,
-        spans: parseSpans(markDefsMap, level.children),
-      };
-      block.children.push(ret);
-    }
+function parseBlock(
+  block: unknown,
+): PoteListBlock | PoteTextBlock | PoteCustomBlock {
+  if (looksLikeListBlock(block)) {
+    validateChildren(block['children']);
+    validateMarkDefs(block['markDefs']);
+    return { kind: 'list', ...block } as PoteListBlock;
+  } else if (looksLikeTextBlock(block)) {
+    validateChildren(block['children']);
+    validateMarkDefs(block['markDefs']);
+    return { kind: 'text', ...block } as PoteTextBlock;
+  } else if (looksLikeCustomBlock(block)) {
+    return { kind: 'custom', ...block } as PoteCustomBlock;
+  } else {
+    throw new PoteParseError('Unable to parse block', block);
   }
-
-  return block;
 }
 
-function parseListBlocks(blocks: PoteListBlock[]): ListBlock {
-  return parseListLevels(groupByLevel(blocks));
-}
-
-function parseSpans(
-  markDefsMap: Record<string, Mark>,
-  spans: PoteChild[],
-): TextSpan[] {
-  return spans.map<TextSpan>((span) => {
-    const { _key, _type, marks, text } = span;
-    return {
-      key: _key,
-      type: _type,
-      text,
-      marks: marks.map((markKey) => {
-        const markDef = markDefsMap[markKey];
-        return markDef ? markDef : { type: markKey };
-      }),
-    };
-  });
-}
-
-function isPoteListBlock(block: PoteBlock): block is PoteListBlock {
-  return block.kind === 'list';
-}
-
-export function parseBlocks(
-  rawBlocks: unknown[],
-): (TextBlock | CustomBlock | ListBlock)[] {
-  const blocks = parse(rawBlocks);
-
-  const ret: (TextBlock | CustomBlock | ListBlock)[] = [];
-  let index = 0;
-
-  while (index < blocks.length) {
-    const block = blocks[index];
-    if (block.kind === 'list') {
-      const foundIndex = blocks.findIndex(
-        (e, n) => n > index && e.kind !== 'list',
-      );
-      const nextIndex = foundIndex === -1 ? blocks.length : foundIndex;
-      const slice = blocks.slice(index, nextIndex);
-      invariant(slice.every(isPoteListBlock));
-      ret.push(parseListBlocks(slice));
-      index = nextIndex;
-    } else {
-      ret.push(parseNonListBlock(block));
-      index++;
-    }
-  }
-
-  return ret;
+export function parse(blocks: unknown[]): PoteBlocks {
+  return blocks.map(parseBlock);
 }

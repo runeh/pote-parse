@@ -1,4 +1,4 @@
-export { ParsedPortableText, parseBlocks } from './parser';
+export { ParsedPortableText, parseBlocks } from './normalizer';
 export {
   PoteBlocks as PortableText,
   PoteChild,
@@ -7,4 +7,4 @@ export {
   PoteMarkDef,
   PoteTextBlock,
   parse as parsePortableText,
-} from './raw-parser';
+} from './parser';
