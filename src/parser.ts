@@ -28,7 +28,7 @@ interface TextSpan {
   text: string;
 }
 
-interface StandardBlock {
+interface TextBlock {
   kind: 'text';
   key: string;
   style: string;
@@ -45,10 +45,10 @@ interface ListBlock {
   kind: 'list';
   type: string;
   level: number;
-  children: (StandardBlock | ListBlock)[];
+  children: (TextBlock | ListBlock)[];
 }
 
-export type ParsedPortableText = (StandardBlock | ListBlock | CustomBlock)[];
+export type ParsedPortableText = (TextBlock | ListBlock | CustomBlock)[];
 
 function parseMarkDefs(markDefs: PoteMarkDef[]): Record<string, Mark> {
   return Object.fromEntries(
@@ -61,10 +61,10 @@ function parseMarkDefs(markDefs: PoteMarkDef[]): Record<string, Mark> {
 
 function parseNonListBlock(
   block: PoteCustomBlock | PoteTextBlock,
-): StandardBlock | CustomBlock {
+): TextBlock | CustomBlock {
   if (block.kind === 'text') {
     const markDefsMap = parseMarkDefs(block.markDefs);
-    const ret: StandardBlock = {
+    const ret: TextBlock = {
       kind: 'text',
       key: block._key,
       style: block.style,
@@ -125,7 +125,7 @@ function parseListLevels(levels: Level): ListBlock {
       block.children.push(parseListLevels(level));
     } else {
       const markDefsMap = parseMarkDefs(level.markDefs);
-      const ret: StandardBlock = {
+      const ret: TextBlock = {
         kind: 'text',
         key: level._key,
         style: level.style,
@@ -166,10 +166,10 @@ function isPoteListBlock(block: PoteBlock): block is PoteListBlock {
 
 export function parseBlocks(
   rawBlocks: unknown[],
-): (StandardBlock | CustomBlock | ListBlock)[] {
+): (TextBlock | CustomBlock | ListBlock)[] {
   const blocks = parsePortableText(rawBlocks);
 
-  const ret: (StandardBlock | CustomBlock | ListBlock)[] = [];
+  const ret: (TextBlock | CustomBlock | ListBlock)[] = [];
   let index = 0;
 
   while (index < blocks.length) {
