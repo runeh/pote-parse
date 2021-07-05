@@ -13,12 +13,13 @@
   "module": "./dist/index.module.js",
   "unpkg": "./dist/index.umd.js",
   "scripts": {
-    "prepare": "husky install",
-    "lint": "eslint ./src --ext .ts",
-    "test": "jest",
     "build": "microbundle",
+    "bundle": "del ./dist/ && microbundle",
     "dev": "microbundle watch",
-    "bundle": "del ./dist/ && microbundle"
+    "lint": "eslint ./src --ext .ts",
+    "prepare": "husky install",
+    "size": "filesize",
+    "test": "jest"
   },
   "engines": {
     "node": ">=10"

@@ -83,15 +83,15 @@ function parseNonListBlock(
   }
 }
 
-type Chunk = (PoteListBlock | Chunk)[];
+type Level = (PoteListBlock | Level)[];
 
 // try non-empty array?
 // public for testing
-export function chunkit(things: PoteListBlock[]): Chunk {
+export function groupByLevel(things: PoteListBlock[]): Level {
   invariant(things.length > 0 && !Array.isArray(things[0]));
 
   const [first, ...rest] = things;
-  const ret: Chunk = [first];
+  const ret: Level = [first];
   let index = 0;
 
   while (index < rest.length) {
@@ -101,7 +101,7 @@ export function chunkit(things: PoteListBlock[]): Chunk {
       index++;
     } else if (item.level > first.level) {
       const startIndex = rest.indexOf(item);
-      const children = chunkit(rest.slice(startIndex));
+      const children = groupByLevel(rest.slice(startIndex));
       ret.push(children);
       index += children.flat().length;
     } else if (item.level < first.level) {
@@ -111,8 +111,8 @@ export function chunkit(things: PoteListBlock[]): Chunk {
   return ret;
 }
 
-function parseListChunks(chunks: Chunk): ListBlock {
-  const [first] = chunks;
+function parseListLevels(levels: Level): ListBlock {
+  const [first] = levels;
   invariant(!Array.isArray(first));
   const block: ListBlock = {
     kind: 'list',
@@ -120,16 +120,16 @@ function parseListChunks(chunks: Chunk): ListBlock {
     type: first.listItem,
     children: [],
   };
-  for (const chunk of chunks) {
-    if (Array.isArray(chunk)) {
-      block.children.push(parseListChunks(chunk));
+  for (const level of levels) {
+    if (Array.isArray(level)) {
+      block.children.push(parseListLevels(level));
     } else {
-      const markDefsMap = parseMarkDefs(chunk.markDefs);
+      const markDefsMap = parseMarkDefs(level.markDefs);
       const ret: StandardBlock = {
         kind: 'text',
-        key: chunk._key,
-        style: chunk.style,
-        spans: parseSpans(markDefsMap, chunk.children),
+        key: level._key,
+        style: level.style,
+        spans: parseSpans(markDefsMap, level.children),
       };
       block.children.push(ret);
     }
@@ -139,7 +139,7 @@ function parseListChunks(chunks: Chunk): ListBlock {
 }
 
 function parseListBlocks(blocks: PoteListBlock[]): ListBlock {
-  return parseListChunks(chunkit(blocks));
+  return parseListLevels(groupByLevel(blocks));
 }
 
 function parseSpans(

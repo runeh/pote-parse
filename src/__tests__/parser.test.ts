@@ -1,4 +1,4 @@
-import { parseBlocks, chunkit } from '../parser';
+import { parseBlocks, groupByLevel } from '../parser';
 import type { PortableText } from '../raw-parser';
 
 type ExpectedReturn = ReturnType<typeof parseBlocks>;
@@ -596,22 +596,22 @@ describe('parser', () => {
 
   describe('chunker', () => {
     it('smoke 1', () => {
-      const chunked = chunkit([{ level: 1 }] as any);
+      const chunked = groupByLevel([{ level: 1 }] as any);
       expect(chunked).toEqual([{ level: 1 }]);
     });
 
     it('smoke 2', () => {
-      const chunked = chunkit([{ level: 1 }, { level: 1 }] as any);
+      const chunked = groupByLevel([{ level: 1 }, { level: 1 }] as any);
       expect(chunked).toEqual([{ level: 1 }, { level: 1 }]);
     });
 
     it('smoke 3', () => {
-      const chunked = chunkit([{ level: 1 }, { level: 2 }] as any);
+      const chunked = groupByLevel([{ level: 1 }, { level: 2 }] as any);
       expect(chunked).toEqual([{ level: 1 }, [{ level: 2 }]]);
     });
 
     it('smoke 4', () => {
-      const chunked = chunkit([
+      const chunked = groupByLevel([
         { level: 1 },
         { level: 2 },
         { level: 1 },
@@ -620,7 +620,7 @@ describe('parser', () => {
     });
 
     it('smoke 4', () => {
-      const chunked = chunkit([
+      const chunked = groupByLevel([
         { level: 1 },
         { level: 2 },
         { level: 3 },
@@ -635,7 +635,7 @@ describe('parser', () => {
     });
 
     it('smoke 5', () => {
-      const chunked = chunkit([
+      const chunked = groupByLevel([
         { level: 1 },
         { level: 2 },
         { level: 3 },
@@ -651,7 +651,7 @@ describe('parser', () => {
     });
 
     it('smoke 6', () => {
-      const chunked = chunkit([
+      const chunked = groupByLevel([
         { level: 1 },
         { level: 2 },
         { level: 3 },
