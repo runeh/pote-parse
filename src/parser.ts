@@ -1,56 +1,56 @@
-export interface PoteChild {
+export interface Child {
   _key: string;
   _type: string;
   marks: string[];
   text: string;
 }
 
-export interface PoteMarkDef {
+export interface MarkDef {
   _key: string;
   _type: string;
   [optionName: string]: unknown;
 }
 
-export interface PoteTextBlock {
+export interface TextBlock {
   kind: 'text';
   _key: string;
   _type: string;
   style: string;
-  markDefs: PoteMarkDef[];
-  children: PoteChild[];
+  markDefs: MarkDef[];
+  children: Child[];
 }
 
-export interface PoteListBlock {
+export interface ListBlock {
   kind: 'list';
   _key: string;
   _type: string;
   level: number;
   listItem: string;
-  markDefs: PoteMarkDef[];
-  children: PoteChild[];
+  markDefs: MarkDef[];
+  children: Child[];
   style: string;
 }
 
-export interface PoteCustomBlock {
+export interface CustomBlock {
   kind: 'custom';
   _key: string;
   _type: string;
   [customOptionName: string]: unknown;
 }
 
-interface PoteThing {
+interface GenericPortableTextObject {
   _key: string;
   _type: string;
   [key: string]: unknown;
 }
 
-export type PoteBlock = PoteListBlock | PoteTextBlock | PoteCustomBlock;
+export type PortableTextBlock = ListBlock | TextBlock | CustomBlock;
 
-export type PoteBlocks = PoteBlock[];
+export type PortableText = PortableTextBlock[];
 
-// fixme: should we check that there is at least one child on blocks?
-
-function isPoteThing(thing: unknown): thing is PoteThing {
+function isPortableTextObject(
+  thing: unknown,
+): thing is GenericPortableTextObject {
   return (
     typeof thing === 'object' &&
     thing != null &&
@@ -60,9 +60,11 @@ function isPoteThing(thing: unknown): thing is PoteThing {
   );
 }
 
-function looksLikeTextBlock(block: unknown): block is PoteThing {
+function looksLikeTextBlock(
+  block: unknown,
+): block is GenericPortableTextObject {
   return (
-    isPoteThing(block) &&
+    isPortableTextObject(block) &&
     block._type === 'block' &&
     typeof block['style'] === 'string' &&
     Array.isArray(block['children']) &&
@@ -70,20 +72,24 @@ function looksLikeTextBlock(block: unknown): block is PoteThing {
   );
 }
 
-function looksLikeListBlock(block: unknown): block is PoteThing {
+function looksLikeListBlock(
+  block: unknown,
+): block is GenericPortableTextObject {
   return (
-    isPoteThing(block) &&
+    isPortableTextObject(block) &&
     looksLikeTextBlock(block) &&
     typeof block['level'] === 'number' &&
     typeof block['listItem'] === 'string'
   );
 }
 
-function looksLikeCustomBlock(block: unknown): block is PoteThing {
-  return isPoteThing(block) && block._type !== 'block';
+function looksLikeCustomBlock(
+  block: unknown,
+): block is GenericPortableTextObject {
+  return isPortableTextObject(block) && block._type !== 'block';
 }
 
-class PoteParseError extends Error {
+export class ParseError extends Error {
   failedBlock: unknown;
 
   constructor(message: string, block: unknown) {
@@ -94,11 +100,11 @@ class PoteParseError extends Error {
 
 function validateMarkDefs(thing: unknown) {
   if (!Array.isArray(thing)) {
-    throw new PoteParseError('Unable to parse markDefs', thing);
+    throw new ParseError('Unable to parse markDefs', thing);
   } else {
     thing.forEach((markDef) => {
-      if (!isPoteThing(markDef)) {
-        throw new PoteParseError('Unable to parse markDef', markDef);
+      if (!isPortableTextObject(markDef)) {
+        throw new ParseError('Unable to parse markDef', markDef);
       }
     });
   }
@@ -106,40 +112,38 @@ function validateMarkDefs(thing: unknown) {
 
 function validateChildren(thing: unknown) {
   if (!Array.isArray(thing)) {
-    throw new PoteParseError('Unable to parse children', thing);
+    throw new ParseError('Unable to parse children', thing);
   } else {
     thing.forEach((child) => {
       const valid =
-        isPoteThing(child) &&
+        isPortableTextObject(child) &&
         Array.isArray(child['marks']) &&
         child['marks'].every((e) => typeof e === 'string') &&
         typeof child['text'] === 'string';
 
       if (!valid) {
-        throw new PoteParseError('Unable to parse child', child);
+        throw new ParseError('Unable to parse child', child);
       }
     });
   }
 }
 
-function parseBlock(
-  block: unknown,
-): PoteListBlock | PoteTextBlock | PoteCustomBlock {
+function parseBlock(block: unknown): ListBlock | TextBlock | CustomBlock {
   if (looksLikeListBlock(block)) {
     validateChildren(block['children']);
     validateMarkDefs(block['markDefs']);
-    return { kind: 'list', ...block } as PoteListBlock;
+    return { kind: 'list', ...block } as ListBlock;
   } else if (looksLikeTextBlock(block)) {
     validateChildren(block['children']);
     validateMarkDefs(block['markDefs']);
-    return { kind: 'text', ...block } as PoteTextBlock;
+    return { kind: 'text', ...block } as TextBlock;
   } else if (looksLikeCustomBlock(block)) {
-    return { kind: 'custom', ...block } as PoteCustomBlock;
+    return { kind: 'custom', ...block } as CustomBlock;
   } else {
-    throw new PoteParseError('Unable to parse block', block);
+    throw new ParseError('Unable to parse block', block);
   }
 }
 
-export function parse(blocks: unknown[]): PoteBlocks {
+export function parse(blocks: unknown[]): PortableText {
   return blocks.map(parseBlock);
 }

@@ -1,12 +1,4 @@
-import {
-  PoteBlock,
-  PoteChild,
-  PoteCustomBlock,
-  PoteListBlock,
-  PoteMarkDef,
-  PoteTextBlock,
-  parse,
-} from './parser';
+import * as parser from './parser';
 
 function invariant(condition: unknown, message?: string): asserts condition {
   if (condition) {
@@ -16,43 +8,49 @@ function invariant(condition: unknown, message?: string): asserts condition {
   }
 }
 
-interface Mark {
+export interface NormalizedMark {
   type: string;
   options?: Record<string, unknown>;
 }
 
-interface TextSpan {
+export interface NormalizedTextSpan {
   key: string;
   type: string; // can this be 'span' | 'link' ?
-  marks: Mark[];
+  marks: NormalizedMark[];
   text: string;
 }
 
-interface TextBlock {
+export interface NormalizedTextBlock {
   kind: 'text';
   key: string;
   style: string;
-  spans: TextSpan[];
+  spans: NormalizedTextSpan[];
 }
 
-interface CustomBlock {
+export interface NormalizedCustomBlock {
   kind: 'custom';
   key: string;
   fields: Record<string, unknown>;
 }
 
-interface ListBlock {
+export interface NormalizedListBlock {
   kind: 'list';
   type: string;
   level: number;
-  children: (TextBlock | ListBlock)[];
+  children: (NormalizedTextBlock | NormalizedListBlock)[];
 }
 
-export type ParsedPortableText = (TextBlock | ListBlock | CustomBlock)[];
+export type NormalizedParsedPortableText = (
+  | NormalizedTextBlock
+  | NormalizedListBlock
+  | NormalizedCustomBlock
+)[];
 
-function parseMarkDefs(markDefs: PoteMarkDef[]): Record<string, Mark> {
+function parseMarkDefs(
+  markDefs: parser.MarkDef[],
+): Record<string, NormalizedMark> {
   return Object.fromEntries(
-    markDefs.map<[string, Mark]>((e) => {
+    markDefs.map<[string, NormalizedMark]>((e) => {
       const { _key, _type, ...rest } = e;
       return [_key, { type: _type, options: rest }];
     }),
@@ -60,11 +58,11 @@ function parseMarkDefs(markDefs: PoteMarkDef[]): Record<string, Mark> {
 }
 
 function parseNonListBlock(
-  block: PoteCustomBlock | PoteTextBlock,
-): TextBlock | CustomBlock {
+  block: parser.CustomBlock | parser.TextBlock,
+): NormalizedTextBlock | NormalizedCustomBlock {
   if (block.kind === 'text') {
     const markDefsMap = parseMarkDefs(block.markDefs);
-    const ret: TextBlock = {
+    const ret: NormalizedTextBlock = {
       kind: 'text',
       key: block._key,
       style: block.style,
@@ -74,7 +72,7 @@ function parseNonListBlock(
   } else {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { _key, _type, kind, ...rest } = block;
-    const ret: CustomBlock = {
+    const ret: NormalizedCustomBlock = {
       kind: 'custom',
       key: _key,
       fields: rest as Record<string, unknown>,
@@ -83,11 +81,11 @@ function parseNonListBlock(
   }
 }
 
-type Level = (PoteListBlock | Level)[];
+type Level = (parser.ListBlock | Level)[];
 
 // try non-empty array?
 // public for testing
-export function groupByLevel(things: PoteListBlock[]): Level {
+export function groupByLevel(things: parser.ListBlock[]): Level {
   invariant(things.length > 0 && !Array.isArray(things[0]));
 
   const [first, ...rest] = things;
@@ -111,10 +109,10 @@ export function groupByLevel(things: PoteListBlock[]): Level {
   return ret;
 }
 
-function parseListLevels(levels: Level): ListBlock {
+function parseListLevels(levels: Level): NormalizedListBlock {
   const [first] = levels;
   invariant(!Array.isArray(first));
-  const block: ListBlock = {
+  const block: NormalizedListBlock = {
     kind: 'list',
     level: first.level,
     type: first.listItem,
@@ -125,7 +123,7 @@ function parseListLevels(levels: Level): ListBlock {
       block.children.push(parseListLevels(level));
     } else {
       const markDefsMap = parseMarkDefs(level.markDefs);
-      const ret: TextBlock = {
+      const ret: NormalizedTextBlock = {
         kind: 'text',
         key: level._key,
         style: level.style,
@@ -138,15 +136,15 @@ function parseListLevels(levels: Level): ListBlock {
   return block;
 }
 
-function parseListBlocks(blocks: PoteListBlock[]): ListBlock {
+function parseListBlocks(blocks: parser.ListBlock[]): NormalizedListBlock {
   return parseListLevels(groupByLevel(blocks));
 }
 
 function parseSpans(
-  markDefsMap: Record<string, Mark>,
-  spans: PoteChild[],
-): TextSpan[] {
-  return spans.map<TextSpan>((span) => {
+  markDefsMap: Record<string, NormalizedMark>,
+  spans: parser.Child[],
+): NormalizedTextSpan[] {
+  return spans.map<NormalizedTextSpan>((span) => {
     const { _key, _type, marks, text } = span;
     return {
       key: _key,
@@ -160,27 +158,31 @@ function parseSpans(
   });
 }
 
-function isPoteListBlock(block: PoteBlock): block is PoteListBlock {
+function isListBlock(
+  block: parser.PortableTextBlock,
+): block is parser.ListBlock {
   return block.kind === 'list';
 }
 
-export function parseBlocks(
-  rawBlocks: unknown[],
-): (TextBlock | CustomBlock | ListBlock)[] {
-  const blocks = parse(rawBlocks);
-
-  const ret: (TextBlock | CustomBlock | ListBlock)[] = [];
+export function normalize(
+  portableText: parser.PortableText,
+): (NormalizedTextBlock | NormalizedCustomBlock | NormalizedListBlock)[] {
+  const ret: (
+    | NormalizedTextBlock
+    | NormalizedCustomBlock
+    | NormalizedListBlock
+  )[] = [];
   let index = 0;
 
-  while (index < blocks.length) {
-    const block = blocks[index];
+  while (index < portableText.length) {
+    const block = portableText[index];
     if (block.kind === 'list') {
-      const foundIndex = blocks.findIndex(
+      const foundIndex = portableText.findIndex(
         (e, n) => n > index && e.kind !== 'list',
       );
-      const nextIndex = foundIndex === -1 ? blocks.length : foundIndex;
-      const slice = blocks.slice(index, nextIndex);
-      invariant(slice.every(isPoteListBlock));
+      const nextIndex = foundIndex === -1 ? portableText.length : foundIndex;
+      const slice = portableText.slice(index, nextIndex);
+      invariant(slice.every(isListBlock));
       ret.push(parseListBlocks(slice));
       index = nextIndex;
     } else {

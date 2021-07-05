@@ -1,12 +1,12 @@
-import { parseBlocks, groupByLevel } from '../normalizer';
-import type { PoteBlocks } from '../parser';
+import { normalize, groupByLevel } from '../normalizer';
+import { PortableText, parse } from '../parser';
 
-type ExpectedReturn = ReturnType<typeof parseBlocks>;
+type ExpectedReturn = ReturnType<typeof normalize>;
 
 describe('parser', () => {
   describe('smoke tests for grouping', () => {
     it('parser 1', () => {
-      const blocks: PoteBlocks = [
+      const blocks: PortableText = [
         {
           _key: '1',
           _type: 'block',
@@ -33,7 +33,7 @@ describe('parser', () => {
         },
       ];
 
-      const parsed = parseBlocks(blocks);
+      const parsed = normalize(parse(blocks));
 
       const expected: ExpectedReturn = [
         {
@@ -60,7 +60,7 @@ describe('parser', () => {
     });
 
     it('parser 2', () => {
-      const blocks: PoteBlocks = [
+      const blocks: PortableText = [
         {
           _key: '1',
           _type: 'block',
@@ -97,7 +97,7 @@ describe('parser', () => {
         },
       ];
 
-      const parsed = parseBlocks(blocks);
+      const parsed = normalize(parse(blocks));
 
       const expected: ExpectedReturn = [
         {
@@ -137,7 +137,7 @@ describe('parser', () => {
     });
 
     it('parser 3', () => {
-      const blocks: PoteBlocks = [
+      const blocks: PortableText = [
         {
           _key: '1',
           _type: 'block',
@@ -174,7 +174,7 @@ describe('parser', () => {
         },
       ];
 
-      const parsed = parseBlocks(blocks);
+      const parsed = normalize(parse(blocks));
 
       const expected: ExpectedReturn = [
         {
@@ -248,7 +248,7 @@ describe('parser', () => {
         },
       ];
 
-      const parsed = parseBlocks(blocks);
+      const parsed = normalize(parse(blocks));
 
       const expected: ExpectedReturn = [
         {
@@ -319,7 +319,7 @@ describe('parser', () => {
         },
       ];
 
-      const parsed = parseBlocks(blocks);
+      const parsed = normalize(parse(blocks));
 
       const expected: ExpectedReturn = [
         {
@@ -352,7 +352,7 @@ describe('parser', () => {
     });
 
     it('parser 6', () => {
-      const parsed = parseBlocks([]);
+      const parsed = normalize([]);
 
       const expected: ExpectedReturn = [];
 
@@ -379,7 +379,7 @@ describe('parser', () => {
         },
       ];
 
-      const parsed = parseBlocks(blocks);
+      const parsed = normalize(parse(blocks));
 
       const expected: ExpectedReturn = [
         {
@@ -418,7 +418,7 @@ describe('parser', () => {
         },
       ];
 
-      const parsed = parseBlocks(blocks);
+      const parsed = normalize(parse(blocks));
 
       const expected: ExpectedReturn = [
         {
@@ -467,7 +467,7 @@ describe('parser', () => {
         },
       ];
 
-      const parsed = parseBlocks(blocks);
+      const parsed = normalize(parse(blocks));
 
       const expected: ExpectedReturn = [
         {
@@ -519,7 +519,7 @@ describe('parser', () => {
         },
       ];
 
-      const parsed = parseBlocks(blocks);
+      const parsed = normalize(parse(blocks));
 
       const expected: ExpectedReturn = [
         {
@@ -1165,6 +1165,6 @@ describe('parser', () => {
       },
     ];
 
-    expect(parseBlocks(raw)).toMatchSnapshot();
+    expect(normalize(parse(raw))).toMatchSnapshot();
   });
 });
