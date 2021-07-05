@@ -59,7 +59,7 @@ describe('parser', () => {
       expect(parsed).toEqual(expected);
     });
 
-    it('parser 2', () => {
+    it.only('parser 2', () => {
       const blocks: PortableText = [
         {
           _key: '1',
@@ -118,20 +118,19 @@ describe('parser', () => {
           spans: [],
           style: 'normal',
         },
-        [
-          {
-            kind: 'list',
-            _key: '4',
-            _type: 'block',
-            listItem: 'yup',
-            children: [],
-            level: 1,
-
-            // fixme: sort out the markDefs here
-            markDefs: [],
-            style: 'normal',
-          },
-        ],
+        {
+          kind: 'list',
+          level: 1,
+          type: 'yup',
+          children: [
+            {
+              key: '4',
+              kind: 'text',
+              spans: [],
+              style: 'normal',
+            },
+          ],
+        },
       ];
 
       expect(parsed).toEqual(expected);
@@ -184,18 +183,25 @@ describe('parser', () => {
           spans: [],
           style: 'normal',
         },
-        [
-          {
-            _key: '2',
-            _type: 'block',
-            children: [],
-            kind: 'list',
-            level: 1,
-            listItem: 'yeah',
-            markDefs: [],
-            style: 'normal',
-          },
-        ],
+        // [
+        //   {
+        //     _key: '2',
+        //     _type: 'block',
+        //     children: [],
+        //     kind: 'list',
+        //     level: 1,
+        //     listItem: 'yeah',
+        //     markDefs: [],
+        //     style: 'normal',
+        //   },
+        // ],
+        {
+          kind: 'list',
+          level: 1,
+          type: 'yup',
+          children: [],
+        },
+
         {
           key: '3',
           kind: 'text',
@@ -262,28 +268,36 @@ describe('parser', () => {
           spans: [],
           style: 'normal',
         },
-        [
-          {
-            _key: '2',
-            _type: 'block',
-            children: [],
-            kind: 'list',
-            level: 1,
-            listItem: 'yup',
-            markDefs: [],
-            style: 'normal',
-          },
-          {
-            _key: '3',
-            _type: 'block',
-            children: [],
-            kind: 'list',
-            level: 1,
-            listItem: 'yup',
-            markDefs: [],
-            style: 'normal',
-          },
-        ],
+        // [
+        //   {
+        //     _key: '2',
+        //     _type: 'block',
+        //     children: [],
+        //     kind: 'list',
+        //     level: 1,
+        //     listItem: 'yup',
+        //     markDefs: [],
+        //     style: 'normal',
+        //   },
+        //   {
+        //     _key: '3',
+        //     _type: 'block',
+        //     children: [],
+        //     kind: 'list',
+        //     level: 1,
+        //     listItem: 'yup',
+        //     markDefs: [],
+        //     style: 'normal',
+        //   },
+        // ],
+
+        {
+          kind: 'list',
+          level: 1,
+          type: 'yup',
+          children: [],
+        },
+
         {
           key: '4',
           kind: 'text',
@@ -338,18 +352,26 @@ describe('parser', () => {
       const parsed = parseBlocks(blocks);
 
       const expected: ExpectedReturn = [
-        [
-          {
-            _key: '1',
-            _type: 'block',
-            children: [],
-            kind: 'list',
-            level: 1,
-            listItem: 'yup',
-            markDefs: [],
-            style: 'normal',
-          },
-        ],
+        // [
+        //   {
+        //     _key: '1',
+        //     _type: 'block',
+        //     children: [],
+        //     kind: 'list',
+        //     level: 1,
+        //     listItem: 'yup',
+        //     markDefs: [],
+        //     style: 'normal',
+        //   },
+        // ],
+
+        {
+          kind: 'list',
+          level: 1,
+          type: 'yup',
+          children: [],
+        },
+
         {
           key: '2',
           kind: 'text',

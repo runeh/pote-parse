@@ -1,4 +1,4 @@
-export { ParsedPortableText } from './parser';
+export { ParsedPortableText, parseBlocks } from './parser';
 export {
   PortableText,
   PoteChild,

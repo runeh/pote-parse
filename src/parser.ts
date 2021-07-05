@@ -1,4 +1,5 @@
 import {
+  PoteBlock,
   PoteChild,
   PoteCustomBlock,
   PoteListBlock,
@@ -42,8 +43,6 @@ interface CustomBlock {
 
 interface ListBlock {
   kind: 'list';
-  key: string;
-  style: string;
   type: string;
   level: number;
   children: (StandardBlock | ListBlock)[];
@@ -88,7 +87,7 @@ type Chunk = (PoteListBlock | Chunk)[];
 
 // try non-empty array?
 // public for testing
-export function chunkit(things: PoteListBlock[]) {
+export function chunkit(things: PoteListBlock[]): Chunk {
   invariant(things.length > 0 && !Array.isArray(things[0]));
 
   const [first, ...rest] = things;
@@ -112,12 +111,36 @@ export function chunkit(things: PoteListBlock[]) {
   return ret;
 }
 
-// export function parseListBlocks(blocks: PoteListBlock[]): ListBlock {
-//   const chunks = chunkit(blocks);
+function parseListChunks(chunks: Chunk): ListBlock {
+  const [first] = chunks;
+  invariant(!Array.isArray(first));
+  const block: ListBlock = {
+    kind: 'list',
+    level: first.level,
+    type: first.listItem,
+    children: [],
+  };
+  for (const chunk of chunks) {
+    if (Array.isArray(chunk)) {
+      block.children.push(parseListChunks(chunk));
+    } else {
+      const markDefsMap = parseMarkDefs(chunk.markDefs);
+      const ret: StandardBlock = {
+        kind: 'text',
+        key: chunk._key,
+        style: chunk.style,
+        spans: parseSpans(markDefsMap, chunk.children),
+      };
+      block.children.push(ret);
+    }
+  }
 
-// // create parent for first child
+  return block;
+}
 
-// }
+function parseListBlocks(blocks: PoteListBlock[]): ListBlock {
+  return parseListChunks(chunkit(blocks));
+}
 
 function parseSpans(
   markDefsMap: Record<string, Mark>,
@@ -137,10 +160,16 @@ function parseSpans(
   });
 }
 
-export function parseBlocks(rawBlocks: unknown[]) {
+function isPoteListBlock(block: PoteBlock): block is PoteListBlock {
+  return block.kind === 'list';
+}
+
+export function parseBlocks(
+  rawBlocks: unknown[],
+): (StandardBlock | CustomBlock | ListBlock)[] {
   const blocks = parsePortableText(rawBlocks);
 
-  const ret: (StandardBlock | CustomBlock | PoteListBlock[])[] = [];
+  const ret: (StandardBlock | CustomBlock | ListBlock)[] = [];
   let index = 0;
 
   while (index < blocks.length) {
@@ -150,8 +179,9 @@ export function parseBlocks(rawBlocks: unknown[]) {
         (e, n) => n > index && e.kind !== 'list',
       );
       const nextIndex = foundIndex === -1 ? blocks.length : foundIndex;
-      // fix this when  parsing
-      ret.push(blocks.slice(index, nextIndex) as PoteListBlock[]);
+      const slice = blocks.slice(index, nextIndex);
+      invariant(slice.every(isPoteListBlock));
+      ret.push(parseListBlocks(slice));
       index = nextIndex;
     } else {
       ret.push(parseNonListBlock(block));

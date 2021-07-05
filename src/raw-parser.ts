@@ -44,7 +44,9 @@ interface PoteThing {
   [key: string]: unknown;
 }
 
-export type PortableText = (PoteListBlock | PoteTextBlock | PoteCustomBlock)[];
+export type PoteBlock = PoteListBlock | PoteTextBlock | PoteCustomBlock;
+
+export type PortableText = PoteBlock[];
 
 // fixme: should we check that there is at least one child on blocks?
 
