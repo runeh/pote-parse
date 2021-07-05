@@ -1,0 +1,49 @@
+{
+  "version": "0.1.0",
+  "license": "Apache 2",
+  "name": "pote-parse",
+  "author": "Rune Finstad Halvorsen",
+  "type": "module",
+  "source": "./src/index.ts",
+  "typings": "dist/index.d.ts",
+  "exports": "./dist/index.modern.js",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.module.js",
+  "unpkg": "./dist/index.umd.js",
+  "scripts": {
+    "test": "jest",
+    "build": "microbundle",
+    "dev": "microbundle watch",
+    "bundle": "del ./dist/ && microbundle"
+  },
+  "engines": {
+    "node": ">=10"
+  },
+  "filesize": {
+    "track": [
+      "./dist/index.cjs",
+      "./dist/index.esm.js",
+      "./dist/index.js",
+      "./dist/index.modern.js",
+      "./dist/index.module.js",
+      "./dist/index.umd.js"
+    ]
+  },
+  "prettier": {
+    "printWidth": 80,
+    "semi": true,
+    "singleQuote": true,
+    "trailingComma": "all"
+  },
+  "devDependencies": {
+    "@ampproject/filesize": "^4.3.0",
+    "@types/jest": "^26.0.23",
+    "del-cli": "^4.0.0",
+    "husky": "^7.0.0",
+    "jest": "^27.0.6",
+    "microbundle": "^0.13.3",
+    "size-limit": "^5.0.1",
+    "ts-jest": "^27.0.3",
+    "typescript": "^4.3.5"
+  }
+}
