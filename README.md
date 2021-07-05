@@ -7,3 +7,4 @@
 - Try to have some arrays require at least one child
 - Go over naming
 - Docs
+- Add comments

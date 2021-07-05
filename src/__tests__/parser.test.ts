@@ -59,7 +59,7 @@ describe('parser', () => {
       expect(parsed).toEqual(expected);
     });
 
-    it.only('parser 2', () => {
+    it('parser 2', () => {
       const blocks: PortableText = [
         {
           _key: '1',
@@ -152,7 +152,7 @@ describe('parser', () => {
           children: [],
           kind: 'list',
           level: 1,
-          listItem: 'yeah',
+          listItem: 'bullet',
           markDefs: [],
           style: 'normal',
         },
@@ -183,23 +183,12 @@ describe('parser', () => {
           spans: [],
           style: 'normal',
         },
-        // [
-        //   {
-        //     _key: '2',
-        //     _type: 'block',
-        //     children: [],
-        //     kind: 'list',
-        //     level: 1,
-        //     listItem: 'yeah',
-        //     markDefs: [],
-        //     style: 'normal',
-        //   },
-        // ],
+
         {
           kind: 'list',
           level: 1,
-          type: 'yup',
-          children: [],
+          type: 'bullet',
+          children: [{ kind: 'text', spans: [], key: '2', style: 'normal' }],
         },
 
         {
@@ -268,34 +257,15 @@ describe('parser', () => {
           spans: [],
           style: 'normal',
         },
-        // [
-        //   {
-        //     _key: '2',
-        //     _type: 'block',
-        //     children: [],
-        //     kind: 'list',
-        //     level: 1,
-        //     listItem: 'yup',
-        //     markDefs: [],
-        //     style: 'normal',
-        //   },
-        //   {
-        //     _key: '3',
-        //     _type: 'block',
-        //     children: [],
-        //     kind: 'list',
-        //     level: 1,
-        //     listItem: 'yup',
-        //     markDefs: [],
-        //     style: 'normal',
-        //   },
-        // ],
 
         {
           kind: 'list',
           level: 1,
           type: 'yup',
-          children: [],
+          children: [
+            { kind: 'text', style: 'normal', key: '2', spans: [] },
+            { kind: 'text', style: 'normal', key: '3', spans: [] },
+          ],
         },
 
         {
@@ -352,26 +322,12 @@ describe('parser', () => {
       const parsed = parseBlocks(blocks);
 
       const expected: ExpectedReturn = [
-        // [
-        //   {
-        //     _key: '1',
-        //     _type: 'block',
-        //     children: [],
-        //     kind: 'list',
-        //     level: 1,
-        //     listItem: 'yup',
-        //     markDefs: [],
-        //     style: 'normal',
-        //   },
-        // ],
-
         {
           kind: 'list',
           level: 1,
           type: 'yup',
-          children: [],
+          children: [{ kind: 'text', key: '1', style: 'normal', spans: [] }],
         },
-
         {
           key: '2',
           kind: 'text',
