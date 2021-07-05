@@ -8,3 +8,4 @@
 - Go over naming
 - Docs
 - Add comments
+- Rename to "NormalizedPortableText"?

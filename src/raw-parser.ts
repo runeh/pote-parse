@@ -46,7 +46,7 @@ interface PoteThing {
 
 export type PoteBlock = PoteListBlock | PoteTextBlock | PoteCustomBlock;
 
-export type PortableText = PoteBlock[];
+export type PoteBlocks = PoteBlock[];
 
 // fixme: should we check that there is at least one child on blocks?
 
@@ -140,6 +140,6 @@ function parseBlock(
   }
 }
 
-export function parsePortableText(blocks: unknown[]): PortableText {
+export function parse(blocks: unknown[]): PoteBlocks {
   return blocks.map(parseBlock);
 }

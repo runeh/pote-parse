@@ -1,12 +1,12 @@
 import { parseBlocks, groupByLevel } from '../parser';
-import type { PortableText } from '../raw-parser';
+import type { PoteBlocks } from '../raw-parser';
 
 type ExpectedReturn = ReturnType<typeof parseBlocks>;
 
 describe('parser', () => {
   describe('smoke tests for grouping', () => {
     it('parser 1', () => {
-      const blocks: PortableText = [
+      const blocks: PoteBlocks = [
         {
           _key: '1',
           _type: 'block',
@@ -60,7 +60,7 @@ describe('parser', () => {
     });
 
     it('parser 2', () => {
-      const blocks: PortableText = [
+      const blocks: PoteBlocks = [
         {
           _key: '1',
           _type: 'block',
@@ -137,7 +137,7 @@ describe('parser', () => {
     });
 
     it('parser 3', () => {
-      const blocks: PortableText = [
+      const blocks: PoteBlocks = [
         {
           _key: '1',
           _type: 'block',

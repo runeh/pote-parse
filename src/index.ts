@@ -1,10 +1,10 @@
 export { ParsedPortableText, parseBlocks } from './parser';
 export {
-  PortableText,
+  PoteBlocks as PortableText,
   PoteChild,
   PoteCustomBlock,
   PoteListBlock,
   PoteMarkDef,
   PoteTextBlock,
-  parsePortableText,
+  parse as parsePortableText,
 } from './raw-parser';

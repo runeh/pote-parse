@@ -5,7 +5,7 @@ import {
   PoteListBlock,
   PoteMarkDef,
   PoteTextBlock,
-  parsePortableText,
+  parse,
 } from './raw-parser';
 
 function invariant(condition: unknown, message?: string): asserts condition {
@@ -167,7 +167,7 @@ function isPoteListBlock(block: PoteBlock): block is PoteListBlock {
 export function parseBlocks(
   rawBlocks: unknown[],
 ): (TextBlock | CustomBlock | ListBlock)[] {
-  const blocks = parsePortableText(rawBlocks);
+  const blocks = parse(rawBlocks);
 
   const ret: (TextBlock | CustomBlock | ListBlock)[] = [];
   let index = 0;

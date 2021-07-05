@@ -1,4 +1,4 @@
-import { parsePortableText } from '../raw-parser';
+import { parse } from '../raw-parser';
 
 describe('raw parser', () => {
   it('smoke test', () => {
@@ -19,7 +19,7 @@ describe('raw parser', () => {
       },
     ];
 
-    const parsed = parsePortableText(raw);
+    const parsed = parse(raw);
 
     expect(parsed).toMatchInlineSnapshot(`
 Array [
