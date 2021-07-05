@@ -94,7 +94,7 @@ function validateMarkDefs(thing: unknown) {
   if (!Array.isArray(thing)) {
     throw new PoteParseError('Unable to parse markDefs', thing);
   } else {
-    thing.forEach(markDef => {
+    thing.forEach((markDef) => {
       if (!isPoteThing(markDef)) {
         throw new PoteParseError('Unable to parse markDef', markDef);
       }
@@ -106,11 +106,11 @@ function validateChildren(thing: unknown) {
   if (!Array.isArray(thing)) {
     throw new PoteParseError('Unable to parse children', thing);
   } else {
-    thing.forEach(child => {
+    thing.forEach((child) => {
       const valid =
         isPoteThing(child) &&
         Array.isArray(child['marks']) &&
-        child['marks'].every(e => typeof e === 'string') &&
+        child['marks'].every((e) => typeof e === 'string') &&
         typeof child['text'] === 'string';
 
       if (!valid) {

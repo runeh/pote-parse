@@ -1,10 +1,10 @@
 import {
-  parsePortableText,
   PoteChild,
   PoteCustomBlock,
   PoteListBlock,
   PoteMarkDef,
   PoteTextBlock,
+  parsePortableText,
 } from './raw-parser';
 
 function invariant(condition: unknown, message?: string): asserts condition {
@@ -73,6 +73,7 @@ function parseNonListBlock(
     };
     return ret;
   } else {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { _key, _type, kind, ...rest } = block;
     const ret: CustomBlock = {
       kind: 'custom',
@@ -83,15 +84,15 @@ function parseNonListBlock(
   }
 }
 
-type Chunk<T> = (T | Chunk<T>)[];
+type Chunk = (PoteListBlock | Chunk)[];
 
 // try non-empty array?
 // public for testing
-export function chunkit<T extends { level: number }>(things: T[]) {
+export function chunkit(things: PoteListBlock[]) {
   invariant(things.length > 0 && !Array.isArray(things[0]));
 
   const [first, ...rest] = things;
-  const ret: Chunk<T> = [first];
+  const ret: Chunk = [first];
   let index = 0;
 
   while (index < rest.length) {

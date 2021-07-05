@@ -574,22 +574,26 @@ describe('parser', () => {
 
   describe('chunker', () => {
     it('smoke 1', () => {
-      const chunked = chunkit([{ level: 1 }]);
+      const chunked = chunkit([{ level: 1 }] as any);
       expect(chunked).toEqual([{ level: 1 }]);
     });
 
     it('smoke 2', () => {
-      const chunked = chunkit([{ level: 1 }, { level: 1 }]);
+      const chunked = chunkit([{ level: 1 }, { level: 1 }] as any);
       expect(chunked).toEqual([{ level: 1 }, { level: 1 }]);
     });
 
     it('smoke 3', () => {
-      const chunked = chunkit([{ level: 1 }, { level: 2 }]);
+      const chunked = chunkit([{ level: 1 }, { level: 2 }] as any);
       expect(chunked).toEqual([{ level: 1 }, [{ level: 2 }]]);
     });
 
     it('smoke 4', () => {
-      const chunked = chunkit([{ level: 1 }, { level: 2 }, { level: 1 }]);
+      const chunked = chunkit([
+        { level: 1 },
+        { level: 2 },
+        { level: 1 },
+      ] as any);
       expect(chunked).toEqual([{ level: 1 }, [{ level: 2 }], { level: 1 }]);
     });
 
@@ -599,7 +603,7 @@ describe('parser', () => {
         { level: 2 },
         { level: 3 },
         { level: 1 },
-      ]);
+      ] as any);
 
       expect(chunked).toEqual([
         { level: 1 },
@@ -615,7 +619,7 @@ describe('parser', () => {
         { level: 3 },
         { level: 2 },
         { level: 1 },
-      ]);
+      ] as any);
 
       expect(chunked).toEqual([
         { level: 1 },
@@ -637,7 +641,7 @@ describe('parser', () => {
         { level: 3 },
         { level: 1 },
         { level: 2 },
-      ]);
+      ] as any);
 
       expect(chunked).toEqual([
         { level: 1 },
