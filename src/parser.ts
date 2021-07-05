@@ -38,6 +38,7 @@ export interface CustomBlock {
   [customOptionName: string]: unknown;
 }
 
+// Helper interface used during parsing. Any kind of thing with _key/_type
 interface GenericPortableTextObject {
   _key: string;
   _type: string;
@@ -128,6 +129,12 @@ function validateChildren(thing: unknown) {
   }
 }
 
+/**
+ * Type checks Portable Text and adds discriminants to the returned objects.
+ *
+ * Note that this could be quite a bit more terse, but at the expense of not
+ * being able to report which block/child/markDef that could not be parsed.
+ */
 function parseBlock(block: unknown): ListBlock | TextBlock | CustomBlock {
   if (looksLikeListBlock(block)) {
     validateChildren(block['children']);
@@ -144,6 +151,12 @@ function parseBlock(block: unknown): ListBlock | TextBlock | CustomBlock {
   }
 }
 
+/**
+ * Parse and validate an array of Portable Text blocks. If the input is not
+ * valid, throws a `ParseError` with a `failedBlock` property.
+ * @param blocks
+ * @returns PortableText
+ */
 export function parse(blocks: unknown[]): PortableText {
   return blocks.map(parseBlock);
 }

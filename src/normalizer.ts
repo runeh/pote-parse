@@ -166,12 +166,8 @@ function isListBlock(
 
 export function normalize(
   portableText: parser.PortableText,
-): (NormalizedTextBlock | NormalizedCustomBlock | NormalizedListBlock)[] {
-  const ret: (
-    | NormalizedTextBlock
-    | NormalizedCustomBlock
-    | NormalizedListBlock
-  )[] = [];
+): NormalizedParsedPortableText {
+  const ret: NormalizedParsedPortableText = [];
   let index = 0;
 
   while (index < portableText.length) {

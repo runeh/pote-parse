@@ -1,7 +1,9 @@
-import { normalize, groupByLevel } from '../normalizer';
+import {
+  normalize,
+  groupByLevel,
+  NormalizedParsedPortableText,
+} from '../normalizer';
 import { PortableText, parse } from '../parser';
-
-type ExpectedReturn = ReturnType<typeof normalize>;
 
 describe('parser', () => {
   describe('smoke tests for grouping', () => {
@@ -35,7 +37,7 @@ describe('parser', () => {
 
       const parsed = normalize(parse(blocks));
 
-      const expected: ExpectedReturn = [
+      const expected: NormalizedParsedPortableText = [
         {
           key: '1',
           kind: 'text',
@@ -99,7 +101,7 @@ describe('parser', () => {
 
       const parsed = normalize(parse(blocks));
 
-      const expected: ExpectedReturn = [
+      const expected: NormalizedParsedPortableText = [
         {
           key: '1',
           kind: 'text',
@@ -176,7 +178,7 @@ describe('parser', () => {
 
       const parsed = normalize(parse(blocks));
 
-      const expected: ExpectedReturn = [
+      const expected: NormalizedParsedPortableText = [
         {
           key: '1',
           kind: 'text',
@@ -250,7 +252,7 @@ describe('parser', () => {
 
       const parsed = normalize(parse(blocks));
 
-      const expected: ExpectedReturn = [
+      const expected: NormalizedParsedPortableText = [
         {
           key: '1',
           kind: 'text',
@@ -321,7 +323,7 @@ describe('parser', () => {
 
       const parsed = normalize(parse(blocks));
 
-      const expected: ExpectedReturn = [
+      const expected: NormalizedParsedPortableText = [
         {
           kind: 'list',
           level: 1,
@@ -354,7 +356,7 @@ describe('parser', () => {
     it('parser 6', () => {
       const parsed = normalize([]);
 
-      const expected: ExpectedReturn = [];
+      const expected: NormalizedParsedPortableText = [];
 
       expect(parsed).toEqual(expected);
     });
@@ -381,7 +383,7 @@ describe('parser', () => {
 
       const parsed = normalize(parse(blocks));
 
-      const expected: ExpectedReturn = [
+      const expected: NormalizedParsedPortableText = [
         {
           key: '1',
           kind: 'text',
@@ -420,7 +422,7 @@ describe('parser', () => {
 
       const parsed = normalize(parse(blocks));
 
-      const expected: ExpectedReturn = [
+      const expected: NormalizedParsedPortableText = [
         {
           key: '1',
           kind: 'text',
@@ -469,7 +471,7 @@ describe('parser', () => {
 
       const parsed = normalize(parse(blocks));
 
-      const expected: ExpectedReturn = [
+      const expected: NormalizedParsedPortableText = [
         {
           key: '1',
           kind: 'text',
@@ -521,7 +523,7 @@ describe('parser', () => {
 
       const parsed = normalize(parse(blocks));
 
-      const expected: ExpectedReturn = [
+      const expected: NormalizedParsedPortableText = [
         {
           key: '1',
           kind: 'text',
