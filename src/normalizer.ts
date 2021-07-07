@@ -29,6 +29,7 @@ export interface NormalizedTextBlock {
 
 export interface NormalizedCustomBlock {
   kind: 'custom';
+  type: string;
   key: string;
   fields: Record<string, unknown>;
 }
@@ -40,11 +41,12 @@ export interface NormalizedListBlock {
   children: (NormalizedTextBlock | NormalizedListBlock)[];
 }
 
-export type NormalizedParsedPortableText = (
+export type NormalizedBlock =
   | NormalizedTextBlock
   | NormalizedListBlock
-  | NormalizedCustomBlock
-)[];
+  | NormalizedCustomBlock;
+
+export type NormalizedPortableText = NormalizedBlock[];
 
 function parseMarkDefs(
   markDefs: parser.MarkDef[],
@@ -74,6 +76,7 @@ function parseNonListBlock(
     const { _key, _type, kind, ...rest } = block;
     const ret: NormalizedCustomBlock = {
       kind: 'custom',
+      type: _type,
       key: _key,
       fields: rest as Record<string, unknown>,
     };
@@ -166,8 +169,8 @@ function isListBlock(
 
 export function normalize(
   portableText: parser.PortableText,
-): NormalizedParsedPortableText {
-  const ret: NormalizedParsedPortableText = [];
+): NormalizedPortableText {
+  const ret: NormalizedPortableText = [];
   let index = 0;
 
   while (index < portableText.length) {

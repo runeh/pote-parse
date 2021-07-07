@@ -12,10 +12,11 @@ export {
 
 export {
   normalize,
-  NormalizedParsedPortableText,
+  NormalizedPortableText,
   NormalizedCustomBlock,
   NormalizedListBlock,
   NormalizedMark,
   NormalizedTextBlock,
   NormalizedTextSpan,
+  NormalizedBlock,
 } from './normalizer';
