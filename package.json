@@ -16,6 +16,7 @@
     "build": "microbundle",
     "bundle": "del ./dist/ && microbundle",
     "dev": "microbundle watch",
+    "format": "prettier --write --plugin-search-dir=. src *.json *.js",
     "lint": "eslint ./src --ext .ts",
     "prepare": "husky install",
     "size": "filesize",
@@ -27,9 +28,8 @@
   "filesize": {
     "track": [
       "./dist/index.cjs",
-      "./dist/index.esm.js",
-      "./dist/index.js",
       "./dist/index.modern.js",
+      "./dist/index.module.js",
       "./dist/index.umd.js"
     ]
   },
