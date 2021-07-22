@@ -11,7 +11,7 @@ The module can perform two tasks:
 
 The module is similar to
 [block-content-tree](https://github.com/sanity-io/block-content-to-tree-js).
-This module uses typescript, so it tried to provide type-safe versions of the
+This module uses typescript, so it tries to provide type-safe versions of the
 parsed data. It also differs a bit in how lists are represented.
 
 To install:
